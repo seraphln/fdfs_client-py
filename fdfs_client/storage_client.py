@@ -234,20 +234,20 @@ class Storage_client(object):
             raise
         finally:
             self.pool.release(store_conn)
-        ret_dic = {
-            'Group name'      : group_name.strip('\x00'),
-            'Remote file_id'  : group_name.strip('\x00') + os.sep + \
-                                   remote_filename,
-            'Status'          : 'Upload successed.',
-            'Local file name' : file_buffer if (upload_type == FDFS_UPLOAD_BY_FILENAME \
+        cur_group_name = group_name.strip('\x00')
+        ret_dict = {
+            'group_name'      : cur_group_name,
+            'remote_file_id'  : '%s%s%s' % (cur_group_name, os.sep, remote_filename),
+            'success'         : True,
+            'local_filename'  : file_buffer if (upload_type == FDFS_UPLOAD_BY_FILENAME \
                                             or upload_type == FDFS_UPLOAD_BY_FILE) \
                                             else '',
-            'Uploaded size'   : appromix(send_file_size) if (upload_type == \
+            'uploaded_size'   : appromix(send_file_size) if (upload_type == \
                                 FDFS_UPLOAD_BY_FILENAME or upload_type == \
                                 FDFS_UPLOAD_BY_FILE) else appromix( len(file_buffer)),
-            'Storage IP'      : store_serv.ip_addr
+            'storage_ip'      : store_serv.ip_addr
         }
-        return ret_dic
+        return ret_dict
 
     def storage_upload_by_filename(self, tracker_client, store_serv, filename, \
                                    meta_dict = None):
@@ -402,11 +402,12 @@ class Storage_client(object):
         finally:
             self.pool.release(store_conn)
         ret_dic = {
-            'Remote file_id' : store_serv.group_name + os.sep + remote_filename,
-            'Content' : file_buffer if download_type == \
+            'remote_file_id' : '%s%s%s' % (store_serv.group_name,
+                                           os.sep, remote_filename),
+            'content'        : file_buffer if download_type == \
                                    FDFS_DOWNLOAD_TO_FILE else recv_buffer,
-            'Download size'   : appromix(total_recv_size),
-            'Storage IP'      : store_serv.ip_addr
+            'download_size'  : appromix(total_recv_size),
+            'storage_ip'     : store_serv.ip_addr
         }
         return ret_dic
 
@@ -509,11 +510,12 @@ class Storage_client(object):
             raise
         finally:
             self.pool.release(store_conn)
-        ret_dict = {}
-        ret_dict['Status'] = 'Append file successed.'
-        ret_dict['Appender file name'] = store_serv.group_name + os.sep + appended_filename
-        ret_dict['Appended size'] = appromix(file_size)
-        ret_dict['Storage IP'] = store_serv.ip_addr
+        ret_dict = {'success': True,
+                    'status' : 'ok',
+                    'appender_filename': '%s%s%s' % (store_serv.group_name,
+                                                     os.sep, appended_filename),
+                    'Appended size': appromix(file_size),
+                    'Storage IP': store_serv.ip_addr}
         return ret_dict
 
     def storage_append_by_filename(self, tracker_client, store_serv, \
@@ -559,9 +561,9 @@ class Storage_client(object):
             raise
         finally:
             self.pool.release(store_conn)
-        ret_dict = {}
-        ret_dict['Status'] = 'Truncate successed.'
-        ret_dict['Storage IP'] = store_serv.ip_addr
+        ret_dict = {'status': 'upload successed.',
+                    'success': True,
+                    'storage_ip': store_serv.ip_addr}
         return ret_dict
 
     def storage_truncate_file(self, tracker_client, store_serv, \
@@ -596,9 +598,10 @@ class Storage_client(object):
             raise
         finally:
             self.pool.release(store_conn)
-        ret_dict = {}
-        ret_dict['Status'] = 'Modify successed.'
-        ret_dict['Storage IP'] = store_serv.ip_addr
+
+        ret_dict = {'status': 'modify successed.',
+                    'success': True,
+                    'storage_ip': store_serv.ip_addr}
         return ret_dict
 
     def storage_modify_by_filename(self, tracker_client, store_serv, \
